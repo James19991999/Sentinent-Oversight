@@ -1,0 +1,94 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function orgId() {
+      return request.auth.token.orgId;
+    }
+
+    function role() {
+      return request.auth.token.role;
+    }
+
+    function isSameOrg(resourceOrgId) {
+      return isSignedIn() && resourceOrgId == orgId();
+    }
+
+    function hasRole(roles) {
+      return isSignedIn() && role() in roles;
+    }
+
+    // Members can read their own org's roster; only owner/admin can write.
+    match /organizations/{orgDocId} {
+      allow read: if isSignedIn() && orgDocId == orgId();
+      allow write: if hasRole(['owner']);
+    }
+
+    match /members/{memberId} {
+      allow read: if isSameOrg(resource.data.orgId);
+      allow create: if hasRole(['owner', 'admin']) && request.resource.data.orgId == orgId();
+      allow update: if hasRole(['owner', 'admin']) && resource.data.orgId == orgId()
+                    && request.resource.data.orgId == orgId();
+      allow delete: if hasRole(['owner']) && resource.data.orgId == orgId();
+    }
+
+    // Threat events: all members read; write requires admin/owner.
+    match /threats/{threatId} {
+      allow read: if isSameOrg(resource.data.orgId);
+      allow create: if hasRole(['owner', 'admin']) && request.resource.data.orgId == orgId();
+      allow update: if hasRole(['owner', 'admin']) && resource.data.orgId == orgId()
+                    && request.resource.data.orgId == orgId();
+      allow delete: if hasRole(['owner', 'admin']) && resource.data.orgId == orgId();
+    }
+
+    // Compliance frameworks: read for all members, write for admin/owner.
+    match /compliance/{frameworkId} {
+      allow read: if isSameOrg(resource.data.orgId);
+      allow write: if hasRole(['owner', 'admin'])
+                   && (resource == null || resource.data.orgId == orgId())
+                   && request.resource.data.orgId == orgId();
+    }
+
+    // Response playbooks: members can trigger runs (update status/lastRunAt
+    // only); only admin/owner can create or delete playbook definitions.
+    match /playbooks/{playbookId} {
+      allow read: if isSameOrg(resource.data.orgId);
+      allow create: if hasRole(['owner', 'admin']) && request.resource.data.orgId == orgId();
+      allow update: if isSameOrg(resource.data.orgId)
+                    && request.resource.data.orgId == orgId()
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['status', 'lastRunAt']);
+      allow delete: if hasRole(['owner', 'admin']) && resource.data.orgId == orgId();
+    }
+
+    // Training modules: read for all, write for admin/owner.
+    match /training/{moduleId} {
+      allow read: if isSameOrg(resource.data.orgId);
+      allow write: if hasRole(['owner', 'admin'])
+                   && (resource == null || resource.data.orgId == orgId())
+                   && request.resource.data.orgId == orgId();
+    }
+
+    // Billing documents: owner only, ever. Not even admin.
+    match /billing/{orgDocId} {
+      allow read: if hasRole(['owner', 'admin']) && orgDocId == orgId();
+      allow write: if hasRole(['owner']) && orgDocId == orgId();
+    }
+
+    // Notification preferences: per-user, not per-org. A user can only
+    // ever read/write their own document — the doc id is their own uid.
+    match /notification_preferences/{uid} {
+      allow read, write: if isSignedIn() && uid == request.auth.uid;
+    }
+
+    // Default deny — anything not explicitly matched above is inaccessible.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
