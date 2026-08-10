@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     );
     return response;
   } catch (err) {
-    // Provide more specific error messages for debugging
+    // Provide more specific error messages for debugging deployment issues
     let message = "Invalid or expired token";
     
     if (err instanceof Error) {
@@ -49,8 +49,8 @@ export async function POST(request: Request) {
       
       if (errorMsg.includes("claims") || errorMsg.includes("org")) {
         message = "Your account is not properly configured. Please contact support.";
-      } else if (errorMsg.includes("firebase")) {
-        message = "Firebase authentication error. Check your credentials are correctly configured.";
+      } else if (errorMsg.includes("firebase") && (errorMsg.includes("credential") || errorMsg.includes("auth"))) {
+        message = "Firebase authentication error. Verify your credentials are correctly configured in the deployment environment.";
       }
     }
     
