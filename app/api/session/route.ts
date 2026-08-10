@@ -40,8 +40,21 @@ export async function POST(request: Request) {
       sessionCookieOptions(SESSION_EXPIRY_MS / 1000)
     );
     return response;
-  } catch {
-    return NextResponse.json({ data: null, error: "Invalid or expired token" }, { status: 401 });
+  } catch (err) {
+    // Provide more specific error messages for debugging
+    let message = "Invalid or expired token";
+    
+    if (err instanceof Error) {
+      const errorMsg = err.message.toLowerCase();
+      
+      if (errorMsg.includes("claims") || errorMsg.includes("org")) {
+        message = "Your account is not properly configured. Please contact support.";
+      } else if (errorMsg.includes("firebase")) {
+        message = "Firebase authentication error. Check your credentials are correctly configured.";
+      }
+    }
+    
+    return NextResponse.json({ data: null, error: message }, { status: 401 });
   }
 }
 
