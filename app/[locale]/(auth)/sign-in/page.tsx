@@ -4,7 +4,7 @@ import { Suspense, useState, type FormEvent } from "react";
 import { useRouter as useNextRouter, useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { signInWithEmailAndPassword, AuthError } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase-client";
 import { sanitizeRedirect } from "@/lib/sanitize-redirect";
 import { InputField } from "@/components/InputField";
@@ -55,19 +55,19 @@ function SignInForm() {
     } catch (err) {
       let message = t("signInError");
       
-      if (err instanceof AuthError) {
+      if (err instanceof Error) {
+        const errorMsg = err.message;
+        
         // Handle Firebase Auth errors with user-friendly messages
-        if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+        if (errorMsg.includes("auth/invalid-credential") || errorMsg.includes("auth/user-not-found") || errorMsg.includes("auth/wrong-password")) {
           message = t("signInError"); // Keep generic for security
-        } else if (err.code === "auth/too-many-requests") {
+        } else if (errorMsg.includes("auth/too-many-requests")) {
           message = "Too many failed login attempts. Please try again later.";
-        } else if (err.code === "auth/user-disabled") {
+        } else if (errorMsg.includes("auth/user-disabled")) {
           message = "This account has been disabled. Please contact support.";
-        }
-      } else if (err instanceof Error) {
-        // Only show non-Firebase errors to user
-        if (!err.message.startsWith("Firebase:")) {
-          message = err.message;
+        } else if (!errorMsg.startsWith("Firebase:")) {
+          // Show non-Firebase errors (e.g., session errors)
+          message = errorMsg;
         }
       }
       
