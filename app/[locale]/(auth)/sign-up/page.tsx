@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, AuthError } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase-client";
 import { InputField } from "@/components/InputField";
 import { Button } from "@/components/Button";
@@ -45,7 +45,24 @@ export default function SignUpPage() {
 
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      let message = "Something went wrong";
+      
+      if (err instanceof AuthError) {
+        // Handle Firebase Auth errors with user-friendly messages
+        if (err.code === "auth/email-already-in-use") {
+          message = "This email is already registered. Please sign in instead.";
+        } else if (err.code === "auth/weak-password") {
+          message = "Password must be at least 8 characters.";
+        } else if (err.code === "auth/invalid-email") {
+          message = "Please enter a valid email address.";
+        } else {
+          message = "Failed to create account. Please try again.";
+        }
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+      
+      setError(message);
     } finally {
       setSubmitting(false);
     }
