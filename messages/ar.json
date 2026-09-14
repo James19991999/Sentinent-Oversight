@@ -49,7 +49,20 @@
     "signUpSubmit": "إنشاء مساحة عمل",
     "signUpSubmitting": "جارٍ إنشاء مساحة عملك…",
     "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
-    "signInLink": "تسجيل الدخول"
+    "signInLink": "تسجيل الدخول",
+    "forgotPasswordLink": "هل نسيت كلمة المرور؟",
+    "forgotPasswordTitle": "إعادة تعيين كلمة المرور",
+    "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيينها.",
+    "forgotPasswordSubmit": "إرسال رابط إعادة التعيين",
+    "forgotPasswordSubmitting": "جارٍ الإرسال…",
+    "forgotPasswordSentTitle": "تحقق من بريدك الإلكتروني",
+    "forgotPasswordSentBody": "إذا كان هناك حساب مرتبط بـ {email}، فقد أرسلنا رابطًا لإعادة تعيين كلمة المرور الخاصة بك.",
+    "forgotPasswordRateLimited": "محاولات كثيرة جدًا. حاول مرة أخرى بعد قليل.",
+    "forgotPasswordInvalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح.",
+    "backToSignIn": "العودة إلى تسجيل الدخول",
+    "completeSetupTitle": "أكمل إعداد مساحة عملك",
+    "completeSetupSubtitle": "تم تسجيل دخولك بنجاح، لكن مؤسستك لم يكتمل إنشاؤها. لنكمل ذلك الآن.",
+    "completeSetupSubmit": "إكمال الإعداد"
   },
   "Dashboard": {
     "eyebrow": "Sentinel Oversight",

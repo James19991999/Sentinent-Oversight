@@ -49,7 +49,20 @@
     "signUpSubmit": "Create workspace",
     "signUpSubmitting": "Creating your workspace…",
     "alreadyHaveAccount": "Already have an account?",
-    "signInLink": "Sign in"
+    "signInLink": "Sign in",
+    "forgotPasswordLink": "Forgot password?",
+    "forgotPasswordTitle": "Reset your password",
+    "forgotPasswordSubtitle": "Enter your email and we'll send you a link to reset it.",
+    "forgotPasswordSubmit": "Send reset link",
+    "forgotPasswordSubmitting": "Sending…",
+    "forgotPasswordSentTitle": "Check your email",
+    "forgotPasswordSentBody": "If an account exists for {email}, we've sent a link to reset your password.",
+    "forgotPasswordRateLimited": "Too many attempts. Please try again shortly.",
+    "forgotPasswordInvalidEmail": "Please enter a valid email address.",
+    "backToSignIn": "Back to sign in",
+    "completeSetupTitle": "Finish setting up your workspace",
+    "completeSetupSubtitle": "Your sign-in worked, but your organization wasn't finished being created. Let's finish that now.",
+    "completeSetupSubmit": "Complete setup"
   },
   "Dashboard": {
     "eyebrow": "Sentinel Oversight",

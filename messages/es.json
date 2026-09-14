@@ -49,7 +49,20 @@
     "signUpSubmit": "Crear espacio de trabajo",
     "signUpSubmitting": "Creando tu espacio de trabajo…",
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
-    "signInLink": "Iniciar sesión"
+    "signInLink": "Iniciar sesión",
+    "forgotPasswordLink": "¿Olvidaste tu contraseña?",
+    "forgotPasswordTitle": "Restablece tu contraseña",
+    "forgotPasswordSubtitle": "Introduce tu correo electrónico y te enviaremos un enlace para restablecerla.",
+    "forgotPasswordSubmit": "Enviar enlace de restablecimiento",
+    "forgotPasswordSubmitting": "Enviando…",
+    "forgotPasswordSentTitle": "Revisa tu correo electrónico",
+    "forgotPasswordSentBody": "Si existe una cuenta para {email}, te hemos enviado un enlace para restablecer tu contraseña.",
+    "forgotPasswordRateLimited": "Demasiados intentos. Vuelve a intentarlo en unos momentos.",
+    "forgotPasswordInvalidEmail": "Introduce una dirección de correo electrónico válida.",
+    "backToSignIn": "Volver a iniciar sesión",
+    "completeSetupTitle": "Termina de configurar tu espacio de trabajo",
+    "completeSetupSubtitle": "Tu inicio de sesión funcionó, pero tu organización no terminó de crearse. Vamos a terminarlo ahora.",
+    "completeSetupSubmit": "Completar configuración"
   },
   "Dashboard": {
     "eyebrow": "Sentinel Oversight",

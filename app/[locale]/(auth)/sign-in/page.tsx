@@ -42,7 +42,14 @@ function SignInForm() {
         body: JSON.stringify({ idToken }),
       });
       if (!sessionRes.ok) {
-        const sessionBody = (await sessionRes.json().catch(() => null)) as { error?: string } | null;
+        const sessionBody = (await sessionRes.json().catch(() => null)) as { error?: string; code?: string } | null;
+        if (sessionBody?.code === "ACCOUNT_NOT_PROVISIONED") {
+          // The password was correct — this account just never finished
+          // being set up (see app/api/session/route.ts). Don't tell them
+          // their password is wrong; send them to actually fix it.
+          router.push(`/${locale}/complete-setup`);
+          return;
+        }
         throw new Error(sessionBody?.error ?? "Could not start session");
       }
 
@@ -98,6 +105,9 @@ function SignInForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
         />
+        <Link href="/forgot-password" className="self-end text-body-sm text-secondary hover:underline">
+          {t("forgotPasswordLink")}
+        </Link>
         {error ? (
           <p role="alert" className="text-body-sm text-error">
             {error}

@@ -21,8 +21,10 @@ export default function SignUpPage() {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+    let accountCreated = false;
     try {
       const credential = await createUserWithEmailAndPassword(getFirebaseAuth(), email, password);
+      accountCreated = true;
       const idToken = await credential.user.getIdToken();
 
       const signUpRes = await fetch("/api/auth/sign-up", {
@@ -45,6 +47,16 @@ export default function SignUpPage() {
 
       router.push("/dashboard");
     } catch (err) {
+      // The Firebase account already exists at this point but has no
+      // organization attached (see the comment in
+      // app/api/session/route.ts for the full failure mechanism this
+      // guards against) — send them straight to finish setup instead of
+      // showing an error on a form that already technically succeeded.
+      if (accountCreated) {
+        router.push("/complete-setup");
+        return;
+      }
+
       let message = "Something went wrong";
       
       if (err instanceof Error) {

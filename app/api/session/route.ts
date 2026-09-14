@@ -27,10 +27,41 @@ export async function POST(request: Request) {
     return NextResponse.json({ data: null, error: adminConfigError }, { status: 503 });
   }
 
+  let decoded;
   try {
     // Verifying the ID token before minting a session cookie prevents a
     // forged/expired token from producing a valid session.
-    await adminAuth().verifyIdToken(idToken);
+    decoded = await adminAuth().verifyIdToken(idToken);
+  } catch {
+    return NextResponse.json({ data: null, error: "Invalid or expired token" }, { status: 401 });
+  }
+
+  // A real, reproducible bug this fixes: sign-up does two things in
+  // sequence — create the Firebase Auth user, then call /api/auth/sign-up
+  // to create an organization and grant orgId/role custom claims. If the
+  // second step ever fails (a network blip, a transient Firebase Admin
+  // credential issue, the user closing the tab) after the first one
+  // succeeded, the result is a real, working login with no organization
+  // attached. That account could sign in successfully — correct password,
+  // valid token — and then get silently redirected straight back to
+  // /sign-in with no error message, because every protected page
+  // correctly treats "no orgId/role" as "not really signed in." From the
+  // user's side that looked indistinguishable from sign-in just not
+  // working at all.
+  //
+  // Catching it here, before minting a cookie that would be useless
+  // downstream anyway, means the sign-in page can detect this specific
+  // case and send the person to /complete-setup to finish provisioning
+  // their existing account, instead of a silent dead end.
+  const claims = decoded as { orgId?: string; role?: string };
+  if (!claims.orgId || !claims.role) {
+    return NextResponse.json(
+      { data: null, error: "ACCOUNT_NOT_PROVISIONED", code: "ACCOUNT_NOT_PROVISIONED" },
+      { status: 409 }
+    );
+  }
+
+  try {
     const sessionCookie = await adminAuth().createSessionCookie(idToken, { expiresIn: SESSION_EXPIRY_MS });
 
     const response = NextResponse.json({ data: { ok: true }, error: null });
@@ -43,17 +74,15 @@ export async function POST(request: Request) {
   } catch (err) {
     // Provide more specific error messages for debugging deployment issues
     let message = "Invalid or expired token";
-    
+
     if (err instanceof Error) {
       const errorMsg = err.message.toLowerCase();
-      
-      if (errorMsg.includes("claims") || errorMsg.includes("org")) {
-        message = "Your account is not properly configured. Please contact support.";
-      } else if (errorMsg.includes("firebase") && (errorMsg.includes("credential") || errorMsg.includes("auth"))) {
+
+      if (errorMsg.includes("firebase") && (errorMsg.includes("credential") || errorMsg.includes("auth"))) {
         message = "Firebase authentication error. Verify your credentials are correctly configured in the deployment environment.";
       }
     }
-    
+
     return NextResponse.json({ data: null, error: message }, { status: 401 });
   }
 }
